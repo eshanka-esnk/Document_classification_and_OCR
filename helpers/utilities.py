@@ -31,7 +31,7 @@ def save_model(epochs, model, optimizer):
 
 def load_model(path: str, device: str, verbose: bool=False):
     model = CNNImageClassification(torch.nn.functional.cross_entropy).to(device)
-    last_model_cp = torch.load(path, weights_only=False)
+    last_model_cp = torch.load(path, weights_only=False, map_location=torch.device(device))
     model.load_state_dict(last_model_cp['model_state_dict'])
     if verbose:
         print(model.eval())
