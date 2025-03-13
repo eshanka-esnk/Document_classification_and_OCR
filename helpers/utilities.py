@@ -62,3 +62,20 @@ def test_model(model, testloader, device):
 
     accuracy = correct_predictions / total_predictions
     print(f"[INFO]: Accuracy: {accuracy:.4f}")
+
+def calculate_mean_std(dataloader, batch_size=128):
+    mean = torch.zeros(3)
+    std = torch.zeros(3)
+    total_samples = 0
+
+    for images, labels in dataloader:
+        batch_size = images.size(0)
+        images = images.view(batch_size, images.size(1), -1)  # Flatten spatial dimensions
+        mean += images.mean(2).sum(0)
+        std += images.std(2).sum(0)
+        total_samples += batch_size
+
+    mean /= total_samples
+    std /= total_samples
+
+    return mean, std
