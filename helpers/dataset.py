@@ -31,24 +31,32 @@ class CustomDataset(torch.utils.data.Dataset):
     
     
 def load_datasets(images: dict, data: dict, train: bool) -> Tuple[(CustomDataset, CustomDataset, CustomDataset)]:
-
+    
+    train_transform = transforms.Compose([
+                        transforms.Resize((224, 224)),
+                        transforms.RandomRotation(degrees=10),
+                        transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+                        transforms.RandomPerspective(distortion_scale=0.2, p=0.5),
+                        transforms.ToTensor(),
+                        transforms.Normalize(mean=[0.6544, 0.6596, 0.6643], std=[0.1878, 0.1899, 0.1975])
+            ])
+    
+    test_val_transforms = transforms.Compose([
+                transforms.Resize((224, 224)), transforms.ToTensor(), transforms.Normalize(mean=[0.6544, 0.6596, 0.6643], std=[0.1878, 0.1899, 0.1975])
+            ])
     try:
         if train:
-            training_data = CustomDataset(data['training_data'], images['training_images'], transform = transforms.Compose([
-                transforms.Resize((224,224)), transforms.ToTensor()
-            ]))
+            
 
-            validation_data = CustomDataset(data['validation_data'], images['validation_images'], transform = transforms.Compose([
-                transforms.Resize((224,224)), transforms.ToTensor()
-            ]))
+            training_data = CustomDataset(data['training_data'], images['training_images'], transform = train_transform)
+
+            validation_data = CustomDataset(data['validation_data'], images['validation_images'], transform = test_val_transforms)
             print(f"[INFO]: Total training images: {len(training_data)}")
             print(f"[INFO]: Total validation images: {len(validation_data)}")
             return training_data, validation_data
 
         else:
-            testing_data = CustomDataset(data['testing_data'], images['testing_images'], transform = transforms.Compose([
-                transforms.Resize((224,224)), transforms.ToTensor()
-            ]))
+            testing_data = CustomDataset(data['testing_data'], images['testing_images'], transform = test_val_transforms)
             print(f"[INFO]: Total test images: {len(testing_data)}")
             return testing_data
 
