@@ -5,7 +5,7 @@ import pandas as pd
 import os
 from torchvision import transforms
 from torch.utils.data.dataloader import DataLoader
-import PIL.Image
+from PIL import Image
 
 class CustomDataset(torch.utils.data.Dataset):
 
@@ -22,7 +22,7 @@ class CustomDataset(torch.utils.data.Dataset):
         row = self.df.iloc[index]
         filename = row.iloc[0]  # First column is the filename
         labels = torch.tensor(row.iloc[1:].values.astype(float), dtype=torch.float32)  # Multi-labels as tensor
-        image = PIL.Image.open(os.path.join(self.images_folder, filename)).convert("RGB")
+        image = Image.open(os.path.join(self.images_folder, filename)).convert("RGB")
 
         if self.transform:
             image = self.transform(image)
