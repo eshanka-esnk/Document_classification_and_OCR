@@ -43,12 +43,12 @@ sudo apt-get install poppler-utils
 
 ### Downloading model
 
-  method 1
+method 1
 > Note: The model file is uploaded into git as parts(50MB each) to satisfy max file limit in github.
 - Use a tool([Winrar](https://www.win-rar.com/) recommended) to extract 'best_model_compressed_part_01.zip' and extract with all parts.
 - Model file 'best_model.pth' should be extracted.
 
-  method2
+method2
 > Note: Use [guide](https://git-lfs.com/) to install git lfs
 - After cloning repo, run
 ```sh
@@ -58,7 +58,7 @@ git lfs pull
 - Model file 'best_model.pth' should be extracted.
 
 ### Run ui
-Note: Make sure [streamlit](https://streamlit.io/) is installed.
+> Note: Make sure [streamlit](https://streamlit.io/) is installed.
 ```sh
 streamlit run ui.py
 ```
