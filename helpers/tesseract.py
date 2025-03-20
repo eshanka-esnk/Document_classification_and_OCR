@@ -1,8 +1,10 @@
 import shutil
+import json
 
 import ftfy
 import pytesseract
 import streamlit as st
+from helpers.helper import Driving_Licence_read, adhaar_read_data, pan_read_data, passport_read_data
 
 
 pytesseract.pytesseract.tesseract_cmd =  None
@@ -117,3 +119,20 @@ def text_encode(text):
         error = str(e)
 
     return (text, error)
+
+def extract_context(text, label):
+    data, error = None, None
+    try:
+        if label == "PAN":
+            data = pan_read_data(text)
+        elif label == "Adhaar Card":
+            data = adhaar_read_data(text)
+        elif label == "Passport":
+            data = passport_read_data(text)
+        elif label == "Driving License":
+            data = Driving_Licence_read(text)
+        # data = json.dumps(data, indent=4, sort_keys=True, separators=(',', ': '))
+    except Exception as e:
+        error = str(e)
+    
+    return data, error
