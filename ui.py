@@ -1,13 +1,11 @@
-import io
-import json
-import ftfy
 import streamlit as st
 from dotenv import load_dotenv
 import os
+import platform
 
 import torch
 from PIL import Image
-from helpers.helper import Driving_Licence_read, adhaar_read_data, pan_read_data, voterid_read_data
+from helpers.helper import save_to_csv
 from helpers.utilities import load_model
 import helpers.constants as constants
 import helpers.opencv as opencv
@@ -25,11 +23,13 @@ tesseract_path = os.getenv('tesseract_path')
 def init_tesseract():
     tess_version = None
     # set tesseract binary path
-    tesseract.set_tesseract_path(tesseract_path)
-    # tesseract.set_tesseract_binary()
-    # if not tesseract.find_tesseract_binary():
-    #     st.error("Tesseract binary not found in PATH. Please install Tesseract.")
-    #     st.stop()
+    if platform.system() == "Windows":
+        tesseract.set_tesseract_path(tesseract_path)
+    else:
+        tesseract.set_tesseract_binary()
+        if not tesseract.find_tesseract_binary():
+            st.error("Tesseract binary not found in PATH. Please install Tesseract.")
+            st.stop()
     # check if tesseract is installed
     tess_version, error = tesseract.get_tesseract_version()
     if error:
@@ -119,14 +119,14 @@ init_session_state_variables()
 init_classification_model()
 
 # apply custom css
-with open(file="helpers\css\style.css", mode='r', encoding='utf-8') as css:
+with open(file="helpers/css/style.css", mode='r', encoding='utf-8') as css:
     st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
 
 st.title(f"Documentation classification and OCR")
 st.markdown("---")
 
 with st.sidebar:
-    st.success(f"Tesseract V **{tesseract_version}** installed")
+    st.success(f"Tesseract v**{tesseract_version}** installed")
     st.header("Tesseract OCR Settings")
     st.button('Reset OCR parameters to default', on_click=reset_sidebar_values)
     # FIXME: OEM option does not work in tesseract 4.1.1
@@ -243,16 +243,8 @@ with col_upload_2:
                         config=custom_oem_psm_config,
                         timeout=timeout,
                     )
-                    text, error = tesseract.text_encode(text)
-                    if st.session_state.predicted_class == "PAN":
-                        data = pan_read_data(text)
-                    elif st.session_state.predicted_class == "Adhaar Card":
-                        data = adhaar_read_data(text)
-                    elif st.session_state.predicted_class == "Voter ID Card":
-                        data = voterid_read_data(text)
-                    elif st.session_state.predicted_class == "Driving License":
-                        data = Driving_Licence_read(text)
-                    data = json.dumps(data, indent=4, sort_keys=True, separators=(',', ': '))
+                    st.session_state.text, error = tesseract.text_encode(text)
+                    st.session_state.data, error = tesseract.extract_context(text, st.session_state.predicted_class)
                     if error:
                         st.error(error)
                     
@@ -285,8 +277,12 @@ if st.session_state.uploaded_file is not None:
             st.download_button(
                 label="Download Extracted Text",
                 data=st.session_state.text.encode("utf-8"),
-                file_name=st.session_state.uploaded_file.name + ".txt",
+                file_name="extracted/"+ st.session_state.uploaded_file.name + ".txt",
                 mime="text/plain",
+            )
+            st.button(
+                label="Download Context Text",
+                on_click=save_to_csv(st.session_state.data)
             )
         else:
             st.warning("No text was extracted.")
