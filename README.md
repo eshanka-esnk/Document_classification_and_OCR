@@ -39,7 +39,7 @@ pip install -r requirements.txt
 ```sh
 sudo apt-get install poppler-utils
 ```
-> Note: Use [chocolatey](https://community.chocolatey.org/) to install [poppler](https://community.chocolatey.org/packages/poppler)https://community.chocolatey.org/packages/poppler on windows and add it's path to the .env file as key 'tesseract_path'.
+> Note: Use [chocolatey](https://community.chocolatey.org/) to install [poppler](https://community.chocolatey.org/packages/poppler) on windows and add it's path to the .env file as key 'tesseract_path'.
 
 ### Downloading model
 
