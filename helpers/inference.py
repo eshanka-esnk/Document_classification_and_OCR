@@ -2,7 +2,7 @@ import torch
 import torchvision.transforms as transforms
 from PIL import Image
 
-classes_dict = {0: 'Driving License', 1: 'PAN', 2: 'Voter ID Card', 3: 'Adhaar Card', 4: 'Adhaar Card', 5: 'Adhaar Card'}
+classes_dict = {0: 'Driving License', 1: 'PAN', 2: 'Passport', 3: 'Adhaar Card', 4: 'Adhaar Card', 5: 'Adhaar Card'}
 
 def classify_image(model, device, image):
     image = image.convert('RGB')
