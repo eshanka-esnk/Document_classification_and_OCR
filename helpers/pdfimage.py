@@ -13,11 +13,11 @@ from pdf2image.exceptions import PDFSyntaxError
 
 @st.cache_data(show_spinner=False)
 def pdftoimage(pdf_file: BytesIO, page: int = 1) -> tuple[np.ndarray, str]:
-    image, error = None, None
+    cv2_image, image, error = None, None, None
     try:
         image = convert(pdf_file=pdf_file, page=page)
+        image = process_image_pil(image)
         if image is not None:
-            pass
             cv2_image = img2opencv2(np.array(image))
         else:
             error = "Invalid PDF page selected."
@@ -33,7 +33,6 @@ def pdftoimage(pdf_file: BytesIO, page: int = 1) -> tuple[np.ndarray, str]:
         error = str(e)
     return (cv2_image, image, error)
 
-
 @st.cache_data(show_spinner=False)
 def convert(pdf_file: BytesIO, page: int = 1) -> np.ndarray:
     images = pdf2image.convert_from_bytes(
@@ -47,6 +46,26 @@ def convert(pdf_file: BytesIO, page: int = 1) -> np.ndarray:
     )
     return images[0] if images else None
 
+def process_image_pil(image):
+    """Processes an image using PIL, similar to the skimage version."""
+
+    image = image.convert("RGB") # Ensure RGB mode
+    image_np = np.array(image, dtype=np.float32) / 255.0  # Normalize to [0, 1]
+
+    white = np.array([1, 1, 1])
+    mask = np.abs(image_np - white).sum(axis=2) < 0.05
+
+    coords = np.array(np.nonzero(~mask))
+    if coords.size == 0:
+      return None # Return None if no non-white pixels are found.
+    top_left = np.min(coords, axis=1)
+    bottom_right = np.max(coords, axis=1)
+
+    out = image_np[top_left[0]:bottom_right[0], top_left[1]:bottom_right[1]]
+
+    out_pil = Image.fromarray(np.uint8(out * 255)) # Convert back to 0-255 range
+
+    return out_pil
 
 # convert image to opencv image
 @st.cache_data(show_spinner=False)
